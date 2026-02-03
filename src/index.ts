@@ -22,6 +22,7 @@ async function main() {
       {
         name: "Skills — Add Opper skills to your AI code editor",
         value: "skills" as const,
+        checked: true,
       },
       {
         name: "OpenCode — Use Opper models in OpenCode",

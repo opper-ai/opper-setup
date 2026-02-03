@@ -35,12 +35,12 @@ export async function setupApiKey() {
   }
 
   const openSite = await confirm({
-    message: "Open https://platform.opper.ai to get your API key?",
+    message: "Open the Opper API keys page in your browser?",
     default: true,
   });
 
   if (openSite) {
-    openBrowser("https://platform.opper.ai");
+    openBrowser("https://platform.opper.ai/settings/api-keys");
     console.log("\nOpening browser...\n");
   }
 
