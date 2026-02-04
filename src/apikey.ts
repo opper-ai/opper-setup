@@ -1,4 +1,4 @@
-import { confirm, password } from "@inquirer/prompts";
+import { confirm, password, select, isCancel, cancel, log } from "@clack/prompts";
 import { exec } from "node:child_process";
 
 function openBrowser(url: string) {
@@ -11,52 +11,36 @@ function openBrowser(url: string) {
   exec(cmd);
 }
 
-function maskKey(key: string): string {
+export function maskKey(key: string): string {
   if (key.length <= 8) return "****";
   return key.slice(0, 3) + "..." + key.slice(-4);
 }
 
-export async function setupApiKey() {
-  if (process.env.OPPER_API_KEY) {
-    console.log(`OPPER_API_KEY is already set (${maskKey(process.env.OPPER_API_KEY)}).\n`);
-    return;
+function handleCancel(value: unknown) {
+  if (isCancel(value)) {
+    cancel("Setup cancelled.");
+    process.exit(0);
   }
+}
 
-  console.log("OPPER_API_KEY is not set.\n");
+function unwrap<T>(value: T | symbol): T {
+  handleCancel(value);
+  return value as T;
+}
 
-  const wantsKey = await confirm({
-    message: "Would you like to set up your Opper API key now?",
-    default: true,
-  });
-
-  if (!wantsKey) {
-    console.log();
-    return;
-  }
-
-  const openSite = await confirm({
-    message: "Open the Opper API keys page in your browser?",
-    default: true,
-  });
-
-  if (openSite) {
-    openBrowser("https://platform.opper.ai/settings/api-keys");
-    console.log("\nOpening browser...\n");
-  }
-
+async function promptForApiKey(): Promise<string | null> {
   const key = await password({
     message: "Paste your API key (input is hidden):",
     mask: "*",
-    validate: (value) => (value.trim().length > 0 ? true : "API key cannot be empty"),
+    validate: (value) => (value && value.trim().length > 0 ? undefined : "API key cannot be empty"),
   });
+  handleCancel(key);
 
-  const trimmedKey = key.trim();
-  const masked = maskKey(trimmedKey);
+  const trimmedKey = (key as string).trim();
+  if (!trimmedKey) return null;
 
-  // Set for the rest of this setup session
   process.env.OPPER_API_KEY = trimmedKey;
-
-  console.log(`\nAPI key set for this setup session (${masked}).`);
+  log.success(`API key set for this session (${maskKey(trimmedKey)}).`);
 
   const shell = process.env.SHELL || "";
   const rcFile = shell.includes("zsh")
@@ -65,6 +49,45 @@ export async function setupApiKey() {
       ? "~/.bashrc"
       : "your shell profile";
 
-  console.log(`To make it permanent, add this to ${rcFile}:\n`);
-  console.log(`  export OPPER_API_KEY=<your-key>\n`);
+  log.info(`To make it permanent, add this to ${rcFile}:`);
+  log.info("  export OPPER_API_KEY=<your-key>");
+
+  return trimmedKey;
+}
+
+export async function maybeSetApiKey(options: { required: boolean; reason?: string }) {
+  if (process.env.OPPER_API_KEY) return process.env.OPPER_API_KEY;
+
+  if (!options.required) {
+    const wantsKey = await confirm({
+      message: "Would you like to set up your Opper API key now?",
+      initialValue: false,
+    });
+    handleCancel(wantsKey);
+    if (!wantsKey) return null;
+  } else {
+    log.warn(
+      `${options.reason ?? "This step"} requires an Opper API key to continue.`,
+    );
+  }
+
+  const action = unwrap<"paste" | "open" | "skip">(
+    await select({
+    message: "How would you like to provide your API key?",
+    options: [
+      { label: "Paste it now", value: "paste" },
+      { label: "Open the API keys page", value: "open" },
+      { label: "Skip for now", value: "skip" },
+    ],
+    }),
+  );
+
+  if (action === "skip") return null;
+
+  if (action === "open") {
+    openBrowser("https://platform.opper.ai/settings/api-keys");
+    log.info("Opened the API keys page in your browser.");
+  }
+
+  return promptForApiKey();
 }

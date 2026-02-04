@@ -1,6 +1,6 @@
 {
   "name": "@opperai/setup",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "description": "Set up Opper tooling for AI code editors",
   "type": "module",
   "bin": {
@@ -16,6 +16,7 @@
     "prepublishOnly": "npm run build"
   },
   "dependencies": {
+    "@clack/prompts": "^1.0.0",
     "@inquirer/prompts": "^7",
     "yaml": "^2.8.2"
   },
