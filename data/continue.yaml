@@ -135,9 +135,25 @@ models:
     roles:
       - chat
       - edit
+  - name: Kimi K2.5 (EU)
+    provider: openai
+    model: evroc/kimi-k2.5
+    apiBase: https://api.opper.ai/v2/openai
+    apiKey: OPPER_API_KEY
+    roles:
+      - chat
+      - edit
   - name: GLM 4.7
     provider: openai
     model: fireworks/glm-4.7
+    apiBase: https://api.opper.ai/v2/openai
+    apiKey: OPPER_API_KEY
+    roles:
+      - chat
+      - edit
+  - name: GLM 4.7 (EU)
+    provider: openai
+    model: berget/glm-4.7
     apiBase: https://api.opper.ai/v2/openai
     apiKey: OPPER_API_KEY
     roles:

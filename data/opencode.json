@@ -94,9 +94,19 @@
           "cost": { "input": 0.60, "output": 3.00 },
           "limit": { "context": 256000, "output": 65536 }
         },
+        "evroc/kimi-k2.5": {
+          "name": "Kimi K2.5 (EU)",
+          "cost": { "input": 0.60, "output": 3.00 },
+          "limit": { "context": 256000, "output": 65536 }
+        },
         "fireworks/glm-4.7": {
           "name": "GLM 4.7",
           "cost": { "input": 0.60, "output": 2.20 },
+          "limit": { "context": 200000, "output": 128000 }
+        },
+        "berget/glm-4.7": {
+          "name": "GLM 4.7 (EU)",
+          "cost": { "input": 0.83, "output": 2.71 },
           "limit": { "context": 200000, "output": 128000 }
         },
         "groq/gpt-oss-120b": {
